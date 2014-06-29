@@ -7,7 +7,18 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <CoreLocation/CoreLocation.h>
 
-@interface STViewController : UIViewController
+@interface STViewController : UIViewController <CLLocationManagerDelegate>
+
+@property (nonatomic, strong) UISwipeGestureRecognizer *swipeGesture;
+
+- (IBAction)unwindToPrevViewController:(UIStoryboardSegue *)unwindSegue;
+
+@property (nonatomic, weak) IBOutlet UIButton *loginButton;
+@property (nonatomic, weak) IBOutlet UIButton *ratesButton;
+
+@property (strong, nonatomic) CLBeaconRegion *appBeaconRegion;
+@property (strong, nonatomic) CLLocationManager *locationManager;
 
 @end

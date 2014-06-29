@@ -8,13 +8,85 @@
 
 #import "STAppDelegate.h"
 
+#import <IBMBaaS/IBMBaaS.h>
+#import <IBMCloudCode/IBMCloudCode.h>
+#import <IBMPush/IBMPush.h>
+
+#import "ST_IBM_PushDelegate.h"
+
+@interface STAppDelegate()
+
+@property ST_IBM_PushDelegate *pushDelegate;
+
+@end
+
 @implementation STAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    
+    NSString *applicationId = nil;
+    NSString *hostName = nil;
+    
+    BOOL hasValidConfiguration = YES;
+    NSString *errorMessage = @"";
+    
+    // Read the applicationId and applicationHostName from the configuration.plist.
+    NSString *configurationPath = [[NSBundle mainBundle] pathForResource:@"configuration" ofType:@"plist"];
+    if(configurationPath){
+        NSDictionary *configuration = [[NSDictionary alloc] initWithContentsOfFile:configurationPath];
+        applicationId = [configuration objectForKey:@"applicationId"];
+        if(!applicationId || [applicationId isEqualToString:@""]){
+            hasValidConfiguration = NO;
+            errorMessage = @"Open the configuration.plist and set the applicationId to the BlueMix applicationId";
+        }
+        
+    }
+    
+    if(hasValidConfiguration){
+        // Initialize the SDK and BlueMix services
+        [IBMBaaS initializeSDK: applicationId];
+        [IBMCloudCode initializeService:@"mSunTrust.ng.bluemix.net"];
+    
+        
+        [IBMPush initializeService];
+        
+        // Register application for push notifications
+        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
+    }else{
+        [NSException raise:@"InvalidApplicationConfiguration" format: @"%@", errorMessage];
+    }
+    
+
+    
+    
+    
     // Override point for customization after application launch.
     return YES;
 }
+
+#pragma mark - Methods for receiving device registration and notifications
+-(void) application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+    self.pushDelegate = [[ST_IBM_PushDelegate alloc]initWithDeviceToken:deviceToken.description];
+    [self.pushDelegate registerDevice];
+}
+
+-(void) application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    // Handle remote Push notification by reloading the list and getting the latest data
+    NSLog(@"Received Push Notification, account did get updated!");
+    //[self.listViewController listItems: nil];
+}
+
+
+-(void) application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+    // Handle remote Push notification by reloading the list and getting the latest data
+    NSLog(@"Failed to register! %@", error.description);
+    //[self.listViewController listItems: nil];
+}
+
 							
 - (void)applicationWillResignActive:(UIApplication *)application
 {

@@ -7,9 +7,22 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STCustomerViewController.h"
+#import "Customer.h"
 
 @interface STAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
+
+@property (strong, nonatomic) UINavigationController *nav;
+@property (strong, nonatomic) UINavigationController *prevNav;
+
+@property (strong, nonatomic) STCustomerViewController *customer;
+
+@property (strong, nonatomic) Customer *customerModel;
+
+@property (strong, nonatomic) NSString *customerID;
+
+@property (strong, nonatomic) NSMutableArray *accountsArray;
 
 @end
